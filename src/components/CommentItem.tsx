@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Comment } from '../types';
 import DOMPurify from 'dompurify';
+
+import { Comment } from '../types';
+import CommentForm from './CommentForm';
+
 
 interface CommentItemProps {
     comment: Comment;
-    onReplyAdded: (parentId: number) => void;
+    onReplyAdded: () => void;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
@@ -29,6 +32,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                 </div>
                 <p className="card-text" dangerouslySetInnerHTML={{ __html: sanitizedContent }}></p>
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
+                {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id}/>}
                 {comment.replies && comment.replies.length > 0 && (
                     <div className="ml-4">
                         {comment.replies.map((reply) => (

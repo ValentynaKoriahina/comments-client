@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Comment } from '../types';
 import CommentItem from './CommentItem';
-import { getComments } from '../services/api'
 
-const CommentTable: React.FC = () => {
+interface CommentTableProps {
+    comments: Comment[];
+    onCommentAdded: () => void;
+}
+
+const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded }) => {
     const [sortField, setSortField] = useState<'username' | 'email' | 'createdAt'>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [sortedComments, setSortedComments] = useState<Comment[]>([]);
-    const [comments, setComments] = useState<Comment[]>([]);
 
-    useEffect(() => {
-        fetchComments();
-    }, []);
 
     useEffect(() => {
         const sorted = [...comments].sort((a, b) => {
@@ -29,17 +29,6 @@ const CommentTable: React.FC = () => {
         setSortOrder(newSortOrder);
     };
 
-    const handleReplyAdded = () => {
-        fetchComments();
-    };
-
-    const fetchComments = async () => {
-        const data = await getComments();
-
-        setComments(data);
-    };
-
-
     return (
         <table className="table">
             <thead>
@@ -54,7 +43,7 @@ const CommentTable: React.FC = () => {
                     <React.Fragment key={comment.id}>
                         <tr className="response-row">
                             <td colSpan={3}>
-                                <CommentItem key={comment.id} comment={comment} onReplyAdded={handleReplyAdded} />
+                                <CommentItem key={comment.id} comment={comment} onReplyAdded={onCommentAdded} />
                             </td>
                         </tr>
                     </React.Fragment>
