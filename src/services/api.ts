@@ -24,7 +24,7 @@ export const addComment = async (
     parentId?: number
 ): Promise<Comment> => {
     try {
-        const response = await axios.post<Comment>(api + '/comment', {
+        const response = await axios.post<Comment>('{api}comment', {
             username,
             email,
             content,
