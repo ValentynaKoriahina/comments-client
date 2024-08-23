@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Lightbox from 'react-18-image-lightbox';
 import 'react-18-image-lightbox/style.css';
+import { getAttachment } from '../services/api'
 
 interface CommentAttachmentProps {
     filename: string;
@@ -8,61 +9,28 @@ interface CommentAttachmentProps {
 
 const CommentAttachment: React.FC<CommentAttachmentProps> = ({ filename }) => {
     const [image, setImage] = useState<string | null>(null);
-    const [file, setFile] = useState<string | null>(null);
+    const [textFile, setTextFile] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const [attachmentType, setAttachmentType] = useState('image');
 
     useEffect(() => {
-
-        const ext = filename.split('.').pop().toLowerCase();
-
-        if (ext === 'txt') {
-            setAttachmentType('text');
-        }
-
-        console.log(attachmentType);
-
-        let isMounted = true;
-        const fileUrl = `http://localhost:3000/api/commentFile/${filename}`;
-
         const fetchData = async () => {
-            try {
-                const response = await fetch(fileUrl);
-                console.log(response);
+            const ext = filename.split('.').pop()?.toLowerCase();
 
-                if (response.ok) {
-                    const contentType = response.headers.get('content-type');
+            const file = await getAttachment(filename);
 
-                    if (contentType && contentType.startsWith('image/')) {
-                        const imageBlob = await response.blob();
-                        const fileUrl = URL.createObjectURL(imageBlob);
-                        if (isMounted) {
-                            setImage(fileUrl);
-                        }
-                    } else if (contentType && contentType.includes('text/')) {
-                        const textData = await response.text();
+            if (ext === 'txt') {
+                console.log("text")
+                console.log(file)
+                setTextFile(file);
+            } else {
+                console.log("image")
+                console.log(file)
 
-                        if (isMounted) {
-                            const blob = new Blob([textData], { type: 'text/plain' });
-                            const fileUrl = URL.createObjectURL(blob);
-                            setFile(fileUrl);
-                        }
-                    } else {
-                        console.error('Неизвестный тип содержимого:', contentType);
-                    }
-                } else {
-                    console.error('Ошибка при получении данных:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Ошибка при получении данных:', error);
+                setImage(file);
             }
         };
 
         fetchData();
-
-        return () => {
-            isMounted = false;
-        };
     }, [filename]);
 
     const handleOpen = () => {
@@ -94,8 +62,8 @@ const CommentAttachment: React.FC<CommentAttachmentProps> = ({ filename }) => {
                         />
                     )}
                 </>
-            ) : file ? (
-                <a href={file} download={filename}>
+            ) : textFile ? (
+                <a href={textFile} download={filename}>
                     Скачать файл
                 </a>
             ) : null
