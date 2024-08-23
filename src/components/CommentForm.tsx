@@ -1,7 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { addComment } from '../services/api';
+import ImageProcessor from '../utils/ImageProcessor'
 import ReCAPTCHA from 'react-google-recaptcha';
 import DOMPurify from 'dompurify';
+
+
 
 interface CommentFormProps {
     onCommentAdded: () => void;
@@ -48,6 +51,19 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (file && file.type.startsWith('image/')) {
+            const imageProcessor = new ImageProcessor(320, 240);
+            try {
+                const resizedBlob = await imageProcessor.resizeImage(file);
+                if (resizedBlob) {
+                    const resizedFile = new File([resizedBlob], file.name, { type: file.type }); // CHANGES!!
+                    setFile(resizedFile);
+                }
+            } catch (error) {
+                console.error('Ошибка обработки изображения:', error);
+            }
+        }
+
         const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
         if (homepage && !urlRegex.test(homepage)) {
             alert('Введите корректный URL для домашней страницы.');
@@ -66,7 +82,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
 
         await addComment(username, email, sanitizedContent, parentId, file);
         recaptcha.current?.reset();
-        onCommentAdded();
+        // onCommentAdded();
     };
 
     return (

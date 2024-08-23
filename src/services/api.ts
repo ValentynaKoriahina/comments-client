@@ -28,7 +28,6 @@ export const addComment = async (
     formData.append('username', username);
     formData.append('email', email);
     formData.append('content', content);
-    console.log(username)
 
     if (parentId !== undefined) {
         formData.append('parentId', parentId.toString());
@@ -38,9 +37,9 @@ export const addComment = async (
         formData.append('file', file);
     }
 
-    formData.forEach((value, key) => {
-        console.log(`${key}: ${value}`);
-    });
+    // formData.forEach((value, key) => {
+    //     console.log(`${key}: ${value}`);
+    // });
 
 
     try {
