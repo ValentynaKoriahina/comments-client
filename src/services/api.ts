@@ -21,14 +21,33 @@ export const addComment = async (
     username: string,
     email: string,
     content: string,
-    parentId?: number
+    parentId?: number,
+    file?: File,
 ): Promise<Comment> => {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('content', content);
+    console.log(username)
+
+    if (parentId !== undefined) {
+        formData.append('parentId', parentId.toString());
+    }
+    
+    if (file) {
+        formData.append('file', file);
+    }
+
+    formData.forEach((value, key) => {
+        console.log(`${key}: ${value}`);
+    });
+
+
     try {
-        const response = await axios.post<Comment>('{api}comment', {
-            username,
-            email,
-            content,
-            parentId,
+        const response = await axios.post<Comment>(`${api}comment`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
 
         return response.data;
@@ -37,3 +56,4 @@ export const addComment = async (
         throw error;
     }
 };
+

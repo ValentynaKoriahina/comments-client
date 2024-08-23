@@ -14,16 +14,17 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     const [email, setEmail] = useState('info@kfkf.com');
     const [homepage, setHomepage] = useState('');
     const [content, setContent] = useState('');
+    const [file, setFile] = useState<File | null>(null);
 
     const validateHTML = (input: string) => {
         // Регулярное выражение для проверки разрешенных HTML тегов
         const allowedTags = /<\/?(a|code|i|strong)(\s+href="[^"]*"\s+title="[^"]*")?\s*>/gi;
-        
+
         // Проверка на наличие запрещенных тегов
         if (input.replace(allowedTags, '').match(/<[^>]+>/)) {
             return false;
         }
-        
+
         // Проверка на правильное закрытие тегов
         const tagStack: string[] = [];
         const tagPattern = /<\/?([a-z]+)[^>]*>/gi;
@@ -63,7 +64,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             ALLOWED_ATTR: ['href', 'title']
         });
 
-        await addComment(username, email, sanitizedContent, parentId, homepage);
+        await addComment(username, email, sanitizedContent, parentId, file);
         recaptcha.current?.reset();
         onCommentAdded();
     };
@@ -108,6 +109,21 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                     required
                 />
             </div>
+            <div className="mb-3">
+                <label htmlFor="formFile" className="form-label">Допустивые типы файлов: JPG, GIF, PNG, TXT</label>
+                <input
+                    className="form-control"
+                    type="file"
+                    id="formFile"
+                    accept=".jpg, .jpeg, .png, .gif, .txt"
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                            setFile(e.target.files[0]);
+                        }
+                    }}
+                />
+            </div>
+
             {/* <div className="mb-3">
                 <ReCAPTCHA
                     ref={recaptcha}
