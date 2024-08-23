@@ -4,7 +4,6 @@ import DOMPurify from 'dompurify';
 import { Comment } from '../types';
 import CommentForm from './CommentForm';
 
-
 interface CommentItemProps {
     comment: Comment;
     onReplyAdded: () => void;
@@ -35,9 +34,11 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                 {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id}/>}
                 {comment.replies && comment.replies.length > 0 && (
                     <div className="ml-4">
-                        {comment.replies.map((reply) => (
-                            <CommentItem key={reply.id} comment={reply} onReplyAdded={onReplyAdded} />
-                        ))}
+                        {comment.replies
+                            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                            .map((reply) => (
+                                <CommentItem key={reply.id} comment={reply} onReplyAdded={onReplyAdded} />
+                            ))}
                     </div>
                 )}
             </div>
