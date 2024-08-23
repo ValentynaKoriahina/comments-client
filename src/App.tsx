@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import CommentTable from './components/CommentTable';
 import CommentForm from './components/CommentForm';
-import { getComments } from './services/api'; 
+
+
+import { getComments } from './services/api';
 import { Comment } from './types';
 
 const App: React.FC = () => {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { Comment } from '../types';
 import CommentForm from './CommentForm';
+import CommentAttachment from './CommentAttachment';
 
 interface CommentItemProps {
     comment: Comment;
@@ -11,6 +12,7 @@ interface CommentItemProps {
 const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
     const content = comment.content;
+    console.log(comment.filename)
 
     const handleReplyClick = () => {
         setShowReplyForm(!showReplyForm);
@@ -29,8 +31,9 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                     </div>
                 </div>
                 <p className="card-text" dangerouslySetInnerHTML={{ __html: content }}></p>
+                <CommentAttachment filename={comment.filename} />
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
-                {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id}/>}
+                {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id} />}
                 {comment.replies && comment.replies.length > 0 && (
                     <div className="ml-4">
                         {comment.replies

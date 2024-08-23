@@ -3,6 +3,7 @@ export interface Comment {
   username: string;
   email: string;
   content: string;
+  filename: string;
   createdAt: string;
   replies?: Comment[];
 }
