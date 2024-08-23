@@ -57,7 +57,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 try {
                     const resizedBlob = await imageProcessor.resizeImage(file);
                     if (resizedBlob) {
-                        const resizedFile = new File([resizedBlob], file.name, { type: file.type }); // CHANGES!!
+                        const resizedFile = new File([resizedBlob], file.name, { type: file.type });
                         setFile(resizedFile);
                     }
                 } catch (error) {
@@ -88,7 +88,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
 
         await addComment(username, email, sanitizedContent, parentId, file);
         recaptcha.current?.reset();
-        // onCommentAdded();
+        onCommentAdded();
     };
 
     return (
