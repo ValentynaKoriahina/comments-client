@@ -14,18 +14,18 @@ const CommentAttachment: React.FC<CommentAttachmentProps> = ({ filename }) => {
 
     useEffect(() => {
         const fetchData = async () => {
+
+            if (!filename) {
+                return;
+            }
+            
             const ext = filename.split('.').pop()?.toLowerCase();
 
             const file = await getAttachment(filename);
 
             if (ext === 'txt') {
-                console.log("text")
-                console.log(file)
                 setTextFile(file);
             } else {
-                console.log("image")
-                console.log(file)
-
                 setImage(file);
             }
         };

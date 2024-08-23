@@ -12,7 +12,7 @@ interface CommentItemProps {
 const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
     const content = comment.content;
-    console.log(comment.filename)
+    const attachment = comment.filename;
 
     const handleReplyClick = () => {
         setShowReplyForm(!showReplyForm);
@@ -31,7 +31,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                     </div>
                 </div>
                 <p className="card-text" dangerouslySetInnerHTML={{ __html: content }}></p>
-                <CommentAttachment filename={comment.filename} />
+                {attachment && (<CommentAttachment filename={attachment} />)}
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
                 {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id} />}
                 {comment.replies && comment.replies.length > 0 && (
@@ -46,6 +46,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
             </div>
         </div>
     );
+    
 };
 
 export default CommentItem;
