@@ -51,18 +51,24 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (file && file.type.startsWith('image/')) {
-            const imageProcessor = new ImageProcessor(320, 240);
-            try {
-                const resizedBlob = await imageProcessor.resizeImage(file);
-                if (resizedBlob) {
-                    const resizedFile = new File([resizedBlob], file.name, { type: file.type }); // CHANGES!!
-                    setFile(resizedFile);
+        if (file) {
+            if (file.type.startsWith('image/')) {
+                const imageProcessor = new ImageProcessor(320, 240);
+                try {
+                    const resizedBlob = await imageProcessor.resizeImage(file);
+                    if (resizedBlob) {
+                        const resizedFile = new File([resizedBlob], file.name, { type: file.type }); // CHANGES!!
+                        setFile(resizedFile);
+                    }
+                } catch (error) {
+                    console.error('Ошибка обработки изображения:', error);
                 }
-            } catch (error) {
-                console.error('Ошибка обработки изображения:', error);
+            } else if (file.type.startsWith('text/')) {
+                if (file.size > 102400 ) {
+                    alert('Размер файла превышает допустимые 100 кб.');
+                }
             }
-        }
+        } 
 
         const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
         if (homepage && !urlRegex.test(homepage)) {
