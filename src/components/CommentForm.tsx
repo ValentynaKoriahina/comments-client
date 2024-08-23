@@ -87,6 +87,11 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         });
 
         await addComment(username, email, sanitizedContent, parentId, file);
+        setUsername('');
+        setEmail('');
+        setHomepage('');
+        setContent('');
+        setFile(null);
         recaptcha.current?.reset();
         onCommentAdded();
     };
