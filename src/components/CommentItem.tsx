@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import DOMPurify from 'dompurify';
 
 import { Comment } from '../types';
 import CommentForm from './CommentForm';
@@ -11,7 +10,7 @@ interface CommentItemProps {
 
 const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
-    const sanitizedContent = DOMPurify.sanitize(comment.content);
+    const content = comment.content;
 
     const handleReplyClick = () => {
         setShowReplyForm(!showReplyForm);
@@ -29,7 +28,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                         </h6>
                     </div>
                 </div>
-                <p className="card-text" dangerouslySetInnerHTML={{ __html: sanitizedContent }}></p>
+                <p className="card-text" dangerouslySetInnerHTML={{ __html: content }}></p>
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
                 {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id}/>}
                 {comment.replies && comment.replies.length > 0 && (
