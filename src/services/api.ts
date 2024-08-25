@@ -22,6 +22,7 @@ export const addComment = async (
     email: string,
     content: string,
     parentId?: number,
+    homepage?: string,
     file?: File | null,
 ): Promise<Comment> => {
     const formData = new FormData();
@@ -31,6 +32,10 @@ export const addComment = async (
 
     if (parentId !== undefined) {
         formData.append('parentId', parentId.toString());
+    }
+
+    if (homepage !== undefined) {
+        formData.append('homepage', homepage.toString());
     }
 
     if (file) {
