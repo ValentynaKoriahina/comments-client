@@ -22,7 +22,7 @@ export const addComment = async (
     email: string,
     content: string,
     parentId?: number,
-    file?: File,
+    file?: File | null,
 ): Promise<Comment> => {
     const formData = new FormData();
     formData.append('username', username);

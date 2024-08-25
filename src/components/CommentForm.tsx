@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { addComment } from '../services/api';
-import ImageProcessor from '../utils/ImageProcessor'
-import ReCAPTCHA from 'react-google-recaptcha';
+import ImageProcessor from '../utils/ImageProcessor';
 import DOMPurify from 'dompurify';
-
-
+import ReCAPTCHA from 'react-google-recaptcha';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaBold, FaItalic, FaCode, FaLink, FaEye } from 'react-icons/fa';
+import CommentPreview from './CommentPreview';
 
 interface CommentFormProps {
     onCommentAdded: () => void;
@@ -14,21 +15,35 @@ interface CommentFormProps {
 const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) => {
     const recaptcha = useRef<ReCAPTCHA | null>(null);
     const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('info@kfkf.com');
+    const [email, setEmail] = useState('');
     const [homepage, setHomepage] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
+    const [preview, setPreview] = useState('');
+
+
+    const insertTag = (tag: string, attribute: string = '') => {
+        const textarea = document.querySelector('textarea');
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = content.slice(start, end);
+        const openTag = `<${tag}${attribute}>`;
+        const closeTag = `</${tag}>`;
+        const newText = openTag + selectedText + closeTag;
+
+        const newContent = content.slice(0, start) + newText + content.slice(end);
+        setContent(newContent);
+    };
 
     const validateHTML = (input: string) => {
-        // Регулярное выражение для проверки разрешенных HTML тегов
         const allowedTags = /<\/?(a|code|i|strong)(\s+href="[^"]*"\s+title="[^"]*")?\s*>/gi;
 
-        // Проверка на наличие запрещенных тегов
         if (input.replace(allowedTags, '').match(/<[^>]+>/)) {
             return false;
         }
 
-        // Проверка на правильное закрытие тегов
         const tagStack: string[] = [];
         const tagPattern = /<\/?([a-z]+)[^>]*>/gi;
         let match: RegExpExecArray | null;
@@ -64,11 +79,11 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                     console.error('Ошибка обработки изображения:', error);
                 }
             } else if (file.type.startsWith('text/')) {
-                if (file.size > 102400 ) {
+                if (file.size > 102400) {
                     alert('Размер файла превышает допустимые 100 кб.');
                 }
             }
-        } 
+        }
 
         const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
         if (homepage && !urlRegex.test(homepage)) {
@@ -81,10 +96,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             return;
         }
 
-        const sanitizedContent = DOMPurify.sanitize(content, {
-            ALLOWED_TAGS: ['a', 'code', 'i', 'strong'],
-            ALLOWED_ATTR: ['href', 'title']
-        });
+        const sanitizedContent = sanitizeContent();
 
         await addComment(username, email, sanitizedContent, parentId, file);
         setUsername('');
@@ -92,9 +104,22 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         setHomepage('');
         setContent('');
         setFile(null);
+        setPreview('');
         recaptcha.current?.reset();
         onCommentAdded();
     };
+
+
+    const showPreview = () => {
+        setPreview(sanitizeContent());
+    }
+
+    const sanitizeContent = () => {
+        return DOMPurify.sanitize(content, {
+            ALLOWED_TAGS: ['a', 'code', 'i', 'strong'],
+            ALLOWED_ATTR: ['href', 'title']
+        });
+    }
 
     return (
         <form onSubmit={handleSubmit} className="mb-4">
@@ -128,16 +153,66 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 />
             </div>
             <div className="mb-3">
-                <textarea
-                    className="form-control"
-                    placeholder="Комментарий"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                />
+                <div className="p-2 mb-2 border rounded" >
+                    <div className="btn-toolbar mt-2 mb-2" role="toolbar">
+                        <div className="btn-group mr-2" role="group">
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => insertTag('i')}
+                                title="Italic"
+                            >
+                                <FaItalic />
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => insertTag('strong')}
+                                title="Bold"
+                            >
+                                <FaBold />
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => insertTag('code')}
+                                title="Code"
+                            >
+                                <FaCode />
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => insertTag('a', ' href="yourlink" title="yourtitle"')}
+                                title="Link"
+                            >
+                                <FaLink />
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => showPreview()}
+                                title="Preview"
+                            >
+                                <FaEye />
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea
+                        className="form-control"
+                        placeholder="Комментарий"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        required
+                    />
+                    {preview && (
+                        <CommentPreview content={preview} />
+                    )}
+                </div>
             </div>
             <div className="mb-3">
-                <label htmlFor="formFile" className="form-label">Допустивые типы файлов: JPG, GIF, PNG, TXT</label>
+                <label htmlFor="formFile" className="form-label">Допустимые типы файлов: JPG, GIF, PNG, TXT</label>
                 <input
                     className="form-control"
                     type="file"
@@ -151,12 +226,6 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 />
             </div>
 
-            {/* <div className="mb-3">
-                <ReCAPTCHA
-                    ref={recaptcha}
-                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}
-                />
-            </div> */}
             <button type="submit" className="btn btn-primary">
                 Добавить комментарий
             </button>
