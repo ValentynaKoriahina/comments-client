@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { addComment } from '../services/api';
+import { validateComment } from '../services/api';
+
 import ImageProcessor from '../utils/ImageProcessor';
 import DOMPurify from 'dompurify';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -15,7 +17,7 @@ interface CommentFormProps {
 const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) => {
     const recaptcha = useRef<ReCAPTCHA | null>(null);
     const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState('fjfjf@kdkd.com');
     const [homepage, setHomepage] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -37,17 +39,11 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         setContent(newContent);
     };
 
-    const validateHTML = (input: string) => {
-        const allowedTags = /<\/?(a|code|i|strong)(\s+href="[^"]*"\s+title="[^"]*")?\s*>/gi;
-
-        if (input.replace(allowedTags, '').match(/<[^>]+>/)) {
-            return false;
-        }
-
+    const validateHTML = (input: string): boolean => {
         const tagStack: string[] = [];
         const tagPattern = /<\/?([a-z]+)[^>]*>/gi;
         let match: RegExpExecArray | null;
-
+    
         while ((match = tagPattern.exec(input)) !== null) {
             const [fullMatch, tagName] = match;
             if (fullMatch.startsWith('</')) {
@@ -59,12 +55,20 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 tagStack.push(tagName);
             }
         }
-
+    
         return tagStack.length === 0;
-    }
+    };
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // AJAX пример валидации данных на стороне сервера
+        const validData: boolean = await validateComment(username, email, content, parentId, homepage);
+
+        if (!validData) {
+            return;
+        }
 
         if (file) {
             if (file.type.startsWith('image/')) {
@@ -85,20 +89,15 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             }
         }
 
-        const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-        if (homepage && !urlRegex.test(homepage)) {
-            alert('Введите корректный URL для домашней страницы.');
-            return;
-        }
 
         if (!validateHTML(content)) {
-            alert('Комментарий содержит недопустимые HTML теги.');
+            alert('Комментарий содержит не закрытые HTML теги.');
             return;
         }
 
         const sanitizedContent = sanitizeContent();
 
-        await addComment(username, email, sanitizedContent, parentId, file);
+        await addComment(username, email, sanitizedContent, parentId, homepage, file);
         setUsername('');
         setEmail('');
         setHomepage('');
@@ -110,7 +109,15 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     };
 
 
-    const showPreview = () => {
+    const showPreview = async () => {
+        // AJAX пример валидации данных на стороне сервера
+        const validData: boolean = await validateComment(username, email, content, parentId, homepage);
+        alert(validData)
+
+        if (!validData) {
+            return;
+        }
+
         setPreview(sanitizeContent());
     }
 

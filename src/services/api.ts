@@ -25,6 +25,7 @@ export const addComment = async (
     homepage?: string,
     file?: File | null,
 ): Promise<Comment> => {
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('email', email);
@@ -101,3 +102,31 @@ export const getAttachment = async (filename: string) => {
     return null;
 };
 
+
+export const validateComment = async (
+    username: string,
+    email: string,
+    content: string,
+    parentId?: number,
+    homepage?: string,
+): Promise<boolean> => {
+    try {
+        const response = await axios.post(`${api}validate/comment`, {
+            username,
+            email,
+            content,
+            parentId,
+            homepage,
+        });
+
+        return true;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            alert('Ошибка: ' + (error.response?.data.message || 'Неизвестная ошибка'));
+        } else {
+            console.error('Ошибка:', error.message);
+        }
+
+        return false;
+    }
+};
