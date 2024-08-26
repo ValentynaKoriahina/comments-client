@@ -22,7 +22,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
         <div className="card mb-3">
             <div className="card-body">
                 <div className="d-flex align-items-center mb-2">
-                    <img src="https://via.placeholder.com/40" alt="avatar" className="rounded-circle mr-2" />
+                    <img src="https://via.placeholder.com/40" alt="avatar" className="rounded-circle me-2" />
                     <div>
                         <h5 className="card-title m-0">{comment.username}</h5>
                         <h6 className="card-subtitle text-muted">
@@ -46,7 +46,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
             </div>
         </div>
     );
-    
+
 };
 
 export default CommentItem;
