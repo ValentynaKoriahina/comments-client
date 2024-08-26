@@ -3,6 +3,7 @@ import { Comment } from '../types';
 import CommentItem from './CommentItem';
 import { Pagination } from 'react-bootstrap';
 import useOnlineUsers from '../hooks/useOnlineUsers';
+import { FaArrowAltCircleUp, FaArrowAltCircleDown } from 'react-icons/fa';
 
 interface CommentTableProps {
     comments: Comment[];
@@ -44,12 +45,24 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
         <div>
             <h5>Users online: {onlineUsers}</h5>
 
-            <table className="table">
+            <table className="table commentTable">
                 <thead>
                     <tr>
-                        <th onClick={() => handleSort('username')}>User Name</th>
-                        <th onClick={() => handleSort('email')}>E-mail</th>
-                        <th onClick={() => handleSort('createdAt')}>Дата добавления</th>
+                        <th onClick={() => handleSort('username')}>
+                            User Name
+                            {sortField === 'username' && sortOrder === 'asc' && <FaArrowAltCircleUp className="ms-2"/>}
+                            {sortField === 'username' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
+                        </th>
+                        <th onClick={() => handleSort('email')}>
+                            E-mail
+                            {sortField === 'email' && sortOrder === 'asc' && <FaArrowAltCircleUp className="ms-2"/>}
+                            {sortField === 'email' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
+                        </th>
+                        <th onClick={() => handleSort('createdAt')}>
+                            Дата добавления
+                            {sortField === 'createdAt' && sortOrder === 'asc' && <FaArrowAltCircleUp className="ms-2"/>}
+                            {sortField === 'createdAt' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
