@@ -140,7 +140,7 @@ export const validateComment = async (
 
 export const getCaptcha = async (): Promise<string> => {
     try {
-        const response = await axios.get(`${serverUrl}/captcha`, {
+        const response = await axios.get(`${api}/captcha`, {
             responseType: 'text',
             withCredentials: true,
         });
@@ -153,7 +153,7 @@ export const getCaptcha = async (): Promise<string> => {
 
 export const verifyCaptcha = async (captchaInput: string): Promise<void | string> => {
     try {
-        await axios.post(`${serverUrl}/verifyCaptcha`, 
+        await axios.post(`${api}/verifyCaptcha`, 
             { captcha: captchaInput }, 
             { withCredentials: true }
         );
