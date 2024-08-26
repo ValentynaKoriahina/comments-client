@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { Comment } from '../types';
 
-const api: string = 'http://localhost:3000/api/'
+
+const serverUrl: string = import.meta.env.VITE_APP_SERVER_URL || 'http://localhost:3000';
+const api: string = serverUrl + '/api/';
+
 
 export const getComments = async (): Promise<Comment[]> => {
+
     try {
         const response = await axios.get(`${api}comments`);
 
@@ -111,7 +115,7 @@ export const validateComment = async (
     homepage?: string,
 ): Promise<boolean> => {
     try {
-        const response = await axios.post(`${api}validate/comment`, {
+        await axios.post(`${api}validate/comment`, {
             username,
             email,
             content,

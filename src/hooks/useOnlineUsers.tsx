@@ -5,7 +5,9 @@ const useOnlineUsers = () => {
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
     useEffect(() => {
-        const socket = io('http://localhost:3000');
+        const serverUrl: string = import.meta.env.VITE_APP_SERVER_URL || 'http://localhost:3000';
+
+        const socket = io(serverUrl);
 
         socket.on('onlineUsers', (users: string[]) => {
             setOnlineUsers(users);
