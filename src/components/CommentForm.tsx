@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DOMPurify from 'dompurify';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaBold, FaItalic, FaCode, FaLink, FaEye } from 'react-icons/fa';
@@ -26,9 +26,19 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     const [captchaSvg, setCaptchaSvg] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
 
+    const alertRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+
     useEffect(() => {
         loadCaptcha();
     }, []);
+
+    useEffect(() => {
+        if (alertMessage && alertRef.current) {
+            alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [alertMessage]);
 
     const loadCaptcha = async () => {
         setCaptchaSvg(await getCaptcha());
@@ -96,6 +106,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                         setFile(resizedFile);
                     }
                 } catch (error) {
+                    setAlertMessage('Произошла ошибка. Попробуйте еще раз позже.');
                     console.error('Ошибка обработки изображения:', error);
                 }
             } else if (file.type.startsWith('text/')) {
@@ -123,13 +134,18 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         setCaptchaInput('');
         loadCaptcha();
         onCommentAdded();
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const showPreview = async () => {
-        const validData: boolean = await validateComment(username, email, content, parentId, homepage);
-
-        if (!validData) {
-            return;
+        // Вариант AJAX запроса
+        try {
+            await validateComment(username, email, content, parentId, homepage);
+        } catch (error) {
+            setAlertMessage(error.message);
         }
 
         setPreview(sanitizeContent());
@@ -144,6 +160,11 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
 
     return (
         <form onSubmit={handleSubmit} className="mb-4">
+            {alertMessage && (
+                <div ref={alertRef} className="alert alert-info mt-3">
+                    {alertMessage}
+                </div>
+            )}
             <div className="mb-3">
                 <input
                     type="text"
@@ -204,7 +225,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary"
-                                onClick={() => insertTag('a', ' href="yourlink" title="yourtitle"')}
+                                onClick={() => insertTag('a', ' href="#" title="yourtitle"')}
                                 title="Link"
                             >
                                 <FaLink />
@@ -238,6 +259,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                     className="form-control"
                     type="file"
                     id="formFile"
+                    ref={fileInputRef}
                     accept=".jpg, .jpeg, .png, .gif, .txt"
                     onChange={(e) => {
                         if (e.target.files && e.target.files.length > 0) {
@@ -264,9 +286,6 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             <button type="submit" className="btn btn-primary">
                 Добавить комментарий
             </button>
-
-            {alertMessage && <div className="alert alert-info mt-3">{alertMessage}</div>}
-
         </form>
     );
 };
