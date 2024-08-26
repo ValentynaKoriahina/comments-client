@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Comment } from '../types';
 import CommentItem from './CommentItem';
 import { Pagination } from 'react-bootstrap';
+import useOnlineUsers from '../hooks/useOnlineUsers';
 
 interface CommentTableProps {
     comments: Comment[];
@@ -13,7 +14,9 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [sortedComments, setSortedComments] = useState<Comment[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const commentsPerPage = 2;
+    const commentsPerPage = 25;
+
+    const onlineUsers = useOnlineUsers();
 
     useEffect(() => {
         const sorted = [...comments].sort((a, b) => {
@@ -39,6 +42,8 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
 
     return (
         <div>
+            <h5>Users online: {onlineUsers}</h5>
+
             <table className="table">
                 <thead>
                     <tr>
