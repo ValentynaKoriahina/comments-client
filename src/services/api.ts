@@ -124,13 +124,49 @@ export const validateComment = async (
         });
 
         return true;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            alert('Ошибка: ' + (error.response?.data.message || 'Неизвестная ошибка'));
-        } else {
-            console.error('Ошибка:', error.message);
+    } catch (error: unknown) {
+        let errorMessage = 'Неизвестная ошибка';
+        if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response.data.message;
+            throw new Error(errorMessage);
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
         }
 
+        console.error('Произошла ошибка:', error);
         return false;
     }
 };
+
+export const getCaptcha = async (): Promise<string> => {
+    try {
+        const response = await axios.get(`${serverUrl}/captcha`, {
+            responseType: 'text',
+            withCredentials: true,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при загрузке CAPTCHA:', error);
+        return('');
+    }
+};
+
+export const verifyCaptcha = async (captchaInput: string): Promise<void | string> => {
+    try {
+        await axios.post(`${serverUrl}/verifyCaptcha`, 
+            { captcha: captchaInput }, 
+            { withCredentials: true }
+        );
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error) && error.response) {
+            if (error.response.status === 400 && error.response.data.verified === false) {
+                throw new Error(error.response.data.message);
+            }
+            console.error('Ошибка при проверке CAPTCHA:', error);
+            throw new Error('Ошибка при проверке CAPTCHA. Попробуйте позже.');
+        } else {
+            console.error('Произошла ошибка:', error);
+        }
+    }
+};
+

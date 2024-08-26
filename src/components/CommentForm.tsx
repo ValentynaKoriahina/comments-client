@@ -1,13 +1,14 @@
-import React, { useRef, useState } from 'react';
-import { addComment } from '../services/api';
-import { validateComment } from '../services/api';
-
-import ImageProcessor from '../utils/ImageProcessor';
+import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
-import ReCAPTCHA from 'react-google-recaptcha';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaBold, FaItalic, FaCode, FaLink, FaEye } from 'react-icons/fa';
 import CommentPreview from './CommentPreview';
+import { addComment } from '../services/api';
+import { getCaptcha } from '../services/api';
+import { verifyCaptcha } from '../services/api';
+import { validateComment } from '../services/api';
+import ImageProcessor from '../utils/ImageProcessor';
+
 
 interface CommentFormProps {
     onCommentAdded: () => void;
@@ -15,14 +16,23 @@ interface CommentFormProps {
 }
 
 const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) => {
-    const recaptcha = useRef<ReCAPTCHA | null>(null);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('fjfjf@kdkd.com');
     const [homepage, setHomepage] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState('');
+    const [captchaInput, setCaptchaInput] = useState('');
+    const [captchaSvg, setCaptchaSvg] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
 
+    useEffect(() => {
+        loadCaptcha();
+    }, []);
+
+    const loadCaptcha = async () => {
+        setCaptchaSvg(await getCaptcha());
+    };
 
     const insertTag = (tag: string, attribute: string = '') => {
         const textarea = document.querySelector('textarea');
@@ -43,7 +53,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         const tagStack: string[] = [];
         const tagPattern = /<\/?([a-z]+)[^>]*>/gi;
         let match: RegExpExecArray | null;
-    
+
         while ((match = tagPattern.exec(input)) !== null) {
             const [fullMatch, tagName] = match;
             if (fullMatch.startsWith('</')) {
@@ -55,18 +65,24 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 tagStack.push(tagName);
             }
         }
-    
+
         return tagStack.length === 0;
     };
-    
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setAlertMessage('');
 
-        // AJAX пример валидации данных на стороне сервера
-        const validData: boolean = await validateComment(username, email, content, parentId, homepage);
 
-        if (!validData) {
+        // Вариант AJAX запроса
+        try {
+            await verifyCaptcha(captchaInput);
+            await validateComment(username, email, content, parentId, homepage);
+        } catch (error) {
+            setAlertMessage(error.message);
+            setCaptchaInput('');
+            await loadCaptcha();
             return;
         }
 
@@ -84,14 +100,14 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 }
             } else if (file.type.startsWith('text/')) {
                 if (file.size > 102400) {
-                    alert('Размер файла превышает допустимые 100 кб.');
+                    setAlertMessage('Размер файла превышает допустимые 100 кб.');
+                    return;
                 }
             }
         }
 
-
         if (!validateHTML(content)) {
-            alert('Комментарий содержит не закрытые HTML теги.');
+            setAlertMessage('Комментарий содержит не закрытые HTML теги.');
             return;
         }
 
@@ -104,29 +120,27 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         setContent('');
         setFile(null);
         setPreview('');
-        recaptcha.current?.reset();
+        setCaptchaInput('');
+        loadCaptcha();
         onCommentAdded();
     };
 
-
     const showPreview = async () => {
-        // AJAX пример валидации данных на стороне сервера
         const validData: boolean = await validateComment(username, email, content, parentId, homepage);
-        alert(validData)
 
         if (!validData) {
             return;
         }
 
         setPreview(sanitizeContent());
-    }
+    };
 
     const sanitizeContent = () => {
         return DOMPurify.sanitize(content, {
             ALLOWED_TAGS: ['a', 'code', 'i', 'strong'],
             ALLOWED_ATTR: ['href', 'title']
         });
-    }
+    };
 
     return (
         <form onSubmit={handleSubmit} className="mb-4">
@@ -160,7 +174,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                 />
             </div>
             <div className="mb-3">
-                <div className="p-2 mb-2 border rounded" >
+                <div className="p-2 mb-2 border rounded">
                     <div className="btn-toolbar mt-2 mb-2" role="toolbar">
                         <div className="btn-group mr-2" role="group">
                             <button
@@ -232,10 +246,27 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
                     }}
                 />
             </div>
+            <div className="d-flex align-items-center mb-5">
+                <div
+                    className="captcha-svg"
+                    dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                />
+                <input
+                    type="text"
+                    className="form-control ml-2"
+                    value={captchaInput}
+                    onChange={(e) => setCaptchaInput(e.target.value)}
+                    placeholder="Введите символы с картинки"
+                    required
+                />
+            </div>
 
             <button type="submit" className="btn btn-primary">
                 Добавить комментарий
             </button>
+
+            {alertMessage && <div className="alert alert-info mt-3">{alertMessage}</div>}
+
         </form>
     );
 };
