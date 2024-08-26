@@ -49,7 +49,7 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
                 <thead>
                     <tr>
                         <th onClick={() => handleSort('username')}>
-                            User Name
+                            User
                             {sortField === 'username' && sortOrder === 'asc' && <FaArrowAltCircleUp className="ms-2"/>}
                             {sortField === 'username' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
                         </th>
@@ -59,7 +59,7 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
                             {sortField === 'email' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
                         </th>
                         <th onClick={() => handleSort('createdAt')}>
-                            Дата добавления
+                            Date
                             {sortField === 'createdAt' && sortOrder === 'asc' && <FaArrowAltCircleUp className="ms-2"/>}
                             {sortField === 'createdAt' && sortOrder === 'desc' && <FaArrowAltCircleDown className="ms-2"/>}
                         </th>
