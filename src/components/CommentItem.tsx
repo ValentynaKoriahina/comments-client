@@ -18,6 +18,11 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
         setShowReplyForm(!showReplyForm);
     };
 
+    const handleReplyAdded = () => {
+        setShowReplyForm(false);
+        onReplyAdded();
+    };
+
     return (
         <div className="card mb-3">
             <div className="card-body">
@@ -33,7 +38,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                 <p className="card-text" dangerouslySetInnerHTML={{ __html: content }}></p>
                 {attachment && (<CommentAttachment filename={attachment} />)}
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
-                {showReplyForm && <CommentForm onCommentAdded={onReplyAdded} parentId={comment.id} />}
+                {showReplyForm && <CommentForm onCommentAdded={handleReplyAdded} parentId={comment.id} />}
                 {comment.replies && comment.replies.length > 0 && (
                     <div className="ml-4">
                         {comment.replies
