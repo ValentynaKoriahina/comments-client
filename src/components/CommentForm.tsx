@@ -17,7 +17,7 @@ interface CommentFormProps {
 
 const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) => {
     const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('fjfjf@kdkd.com');
+    const [email, setEmail] = useState('');
     const [homepage, setHomepage] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -89,12 +89,17 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         try {
             await verifyCaptcha(captchaInput);
             await validateComment(username, email, content, parentId, homepage);
-        } catch (error) {
-            setAlertMessage(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setAlertMessage(error.message);
+            } else {
+                setAlertMessage('Произошла неивестная ошибка. Попробуйте еще раз позже');
+            }
             setCaptchaInput('');
             await loadCaptcha();
             return;
         }
+
 
         if (file) {
             if (file.type.startsWith('image/')) {
@@ -141,11 +146,16 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     };
 
     const showPreview = async () => {
+
         // Вариант AJAX запроса
         try {
             await validateComment(username, email, content, parentId, homepage);
-        } catch (error) {
-            setAlertMessage(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setAlertMessage(error.message);
+            } else {
+                setAlertMessage('Произошла неивестная ошибка. Попробуйте еще раз позже');
+            }
         }
 
         setPreview(sanitizeContent());

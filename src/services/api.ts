@@ -169,4 +169,3 @@ export const verifyCaptcha = async (captchaInput: string): Promise<void | string
         }
     }
 };
-
