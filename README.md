@@ -1,50 +1,91 @@
-# React + TypeScript + Vite
+# React Комментарии
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это приложение на React позволяет пользователям оставлять комментарии, загружать вложения, а также просматривать список комментариев в таблице с поддержкой сортировки и пагинации. Приложение использует серверную часть для обработки и хранения данных.
 
-Currently, two official plugins are available:
+## Содержание
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Функциональные возможности](#функциональные-возможности)
+- [Установка и запуск](#установка-и-запуск)
+- [Технологии](#технологии)
+- [Структура проекта](#структура-проекта)
+- [API](#api)
 
-## Expanding the ESLint configuration
+## Функциональные возможности
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Оставление комментариев с поддержкой вложений (изображения или текстовые файлы).
+- Форматирование и предварительный просмотр комментария перед отправкой.
+- Сортировка комментариев по имени пользователя, электронной почте или дате создания.
+- Пагинация для удобного просмотра большого количества комментариев.
+- Информация о количестве пользователей онлайн в реальном времени.
+- Валидация CAPTCHA перед добавлением комментария.
 
-- Configure the top-level `parserOptions` property like this:
+## Установка и запуск
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 1. Установка зависимостей
+
+```
+npm install
+```
+### 2. Запуск приложения в режиме разработчика
+```
+npm run dev
+```
+Приложение будет доступно по адресу `http://localhost:5173` по умолчанию.
+
+### 3. Сборка для продакшена
+
+
+Создайте файл .env в корне проекта и добавьте следующие переменные окружения:
+
+```
+VITE_APP_SERVER_URL=https://0.0.0.0:3000
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Замените `https://0.0.0.0:3000` на URL вашего сервера. Не используйте `localhost`, чтобы избежать проблем с политикой CORS.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
 ```
+npm run build
+```
+После этого файлы сборки будут находиться в директории `dist`.
+
+# Технологии
+- React - Основной фреймворк для разработки пользовательского интерфейса.
+- Vite - Инструмент для сборки и разработки, обеспечивающий быструю разработку и мгновенное обновление модулей.
+- TypeScript - Строгая типизация для повышения надежности кода.
+- Bootstrap - Стилизация приложения с использованием популярного CSS-фреймворка.
+- Socket.IO - Для получения информации о пользователях онлайн в реальном времени.
+- Axios - Для выполнения HTTP-запросов к серверу.
+- DOMPurify - Для очистки HTML-контента и предотвращения XSS-атак.
+
+# Структура проекта
+
+## Основные папки и файлы
+
+- **`src/`** - Исходный код приложения
+  - **`components/`** - Компоненты приложения
+    - `CommentForm.tsx` - Форма для добавления комментариев
+    - `CommentTable.tsx` - Таблица с комментариями
+    - `CommentItem.tsx` - Отдельный элемент комментария
+    - `CommentAttachment.tsx` - Компонент для отображения вложений
+    - `CommentPreview.tsx` - Предварительный просмотр комментария
+  - **`hooks/`** - Хук для получения списка онлайн пользователей в реальном времени
+  - **`services/`** - API-сервисы для взаимодействия с сервером
+    - `api.ts` - Модуль с определением API методов
+  - **`utils/`** - Утилитарные функции и классы
+    - `ImageProcessor.ts` - Класс для обработки изображений (сжатие)
+- `types.ts` - Определения типов для приложения
+
+
+# API
+
+Приложение взаимодействует с сервером через следующие API:
+
+- **GET** `/api/comments` - Получение списка комментариев.
+- **POST** `/api/comment` - Добавление нового комментария.
+- **POST** `/api/validate/comment` - Валидация комментария перед добавлением.
+- **GET** `/api/commentFile/` - Получение файла-вложения.
+- **GET** `/api/captcha` - Получение CAPTCHA.
+- **POST** `/api/verifyCaptcha` - Проверка CAPTCHA.
+
+
