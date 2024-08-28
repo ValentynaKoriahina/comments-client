@@ -1,3 +1,4 @@
+/* CommentTable */
 .commentTable {
   width: 100%;
   table-layout: fixed;
@@ -13,4 +14,10 @@
 
 .commentTable th {
   cursor: pointer; 
+}
+
+/* CommentItem */
+.break-word-text {
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }

@@ -35,7 +35,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReplyAdded }) => {
                         </h6>
                     </div>
                 </div>
-                <p className="card-text" dangerouslySetInnerHTML={{ __html: content }}></p>
+                <p className="card-text w-100 break-word-text" dangerouslySetInnerHTML={{ __html: content }}></p>
                 {attachment && (<CommentAttachment filename={attachment} />)}
                 <button className="btn btn-link p-3" onClick={handleReplyClick}>Ответить</button>
                 {showReplyForm && <CommentForm onCommentAdded={handleReplyAdded} parentId={comment.id} />}
