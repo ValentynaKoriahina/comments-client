@@ -5,11 +5,19 @@ import { Pagination } from 'react-bootstrap';
 import useOnlineUsers from '../hooks/useOnlineUsers';
 import { FaArrowAltCircleUp, FaArrowAltCircleDown } from 'react-icons/fa';
 
+
+/**
+ * @property {Comment[]} comments - Массив комментариев для отображения.
+ * @property {() => void} onCommentAdded - Функция, вызываемая при добавлении нового комментария.
+ */
 interface CommentTableProps {
     comments: Comment[];
     onCommentAdded: () => void;
 }
 
+/**
+ * Компонент для отображения таблицы комментариев с возможностью сортировки и пагинации.
+ */
 const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded }) => {
     const [sortField, setSortField] = useState<'username' | 'email' | 'createdAt'>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -17,8 +25,10 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
     const [currentPage, setCurrentPage] = useState(1);
     const commentsPerPage = 25;
 
+    // Хук для получения данных о количестве пользователей онлайн
     const onlineUsers = useOnlineUsers();
 
+    // Сортировка комментариев при изменении данных или параметров сортировки
     useEffect(() => {
         const sorted = [...comments].sort((a, b) => {
             let comparison = 0;
@@ -35,6 +45,7 @@ const CommentTable: React.FC<CommentTableProps> = ({ comments, onCommentAdded })
         setSortOrder(newSortOrder);
     };
 
+    // Вычисление индексов для текущих комментариев на странице
     const indexOfLastComment = currentPage * commentsPerPage;
     const indexOfFirstComment = indexOfLastComment - commentsPerPage;
     const currentComments = sortedComments.slice(indexOfFirstComment, indexOfLastComment);

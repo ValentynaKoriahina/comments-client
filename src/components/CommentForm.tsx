@@ -10,11 +10,18 @@ import { validateComment } from '../services/api';
 import ImageProcessor from '../utils/ImageProcessor';
 
 
+/**
+ * @property {() => void} onCommentAdded - Функция, вызываемая после добавления нового комментария.
+ * @property {number} [parentId] - ID родительского комментария, если комментарий является ответом.
+ */
 interface CommentFormProps {
     onCommentAdded: () => void;
     parentId?: number;
 }
 
+/**
+ * Компонент для отображения формы добавления комментария с поддержкой форматирования, предварительного просмотра и проверки капчи.
+ */
 const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -29,21 +36,24 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
     const alertRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-
+    // Загружаем капчу при первом рендере компонента
     useEffect(() => {
         loadCaptcha();
     }, []);
 
+    // Прокручиваем к сообщению об ошибке, если оно появилось
     useEffect(() => {
         if (alertMessage && alertRef.current) {
             alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, [alertMessage]);
 
+    // Функция для загрузки новой капчи
     const loadCaptcha = async () => {
         setCaptchaSvg(await getCaptcha());
     };
 
+    // Вставка HTML-тегов для форматирования текста
     const insertTag = (tag: string, attribute: string = '') => {
         const textarea = document.querySelector('textarea');
         if (!textarea) return;
@@ -59,6 +69,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         setContent(newContent);
     };
 
+    // Проверка на корректное закрытие HTML-тегов в комментарии
     const validateHTML = (input: string): boolean => {
         const tagStack: string[] = [];
         const tagPattern = /<\/?([a-z]+)[^>]*>/gi;
@@ -79,13 +90,13 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         return tagStack.length === 0;
     };
 
-
+    // Обработка отправки формы
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setAlertMessage('');
 
-
-        // Вариант AJAX запроса
+        // Валидация данных. Исключение означает провал валидации. 
+        // Текст ошибки используется в уведомлениях и может поступать с сервера.
         try {
             await verifyCaptcha(captchaInput);
             await validateComment(username, email, content, parentId, homepage);
@@ -93,14 +104,14 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             if (error instanceof Error) {
                 setAlertMessage(error.message);
             } else {
-                setAlertMessage('Произошла неивестная ошибка. Попробуйте еще раз позже');
+                setAlertMessage('Произошла неизвестная ошибка. Попробуйте еще раз позже');
             }
             setCaptchaInput('');
             await loadCaptcha();
             return;
         }
 
-
+        // Обработка загрузки файла (сжатие изображения, проверка размера файла)
         if (file) {
             if (file.type.startsWith('image/')) {
                 const imageProcessor = new ImageProcessor(320, 240);
@@ -122,13 +133,16 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
             }
         }
 
+        // Проверка на корректность HTML в комментарии
         if (!validateHTML(content)) {
             setAlertMessage('Комментарий содержит не закрытые HTML теги.');
             return;
         }
 
+        // Очистка контента от нежелательных HTML-тегов
         const sanitizedContent = sanitizeContent();
 
+        // Добавление комментария через API
         await addComment(username, email, sanitizedContent, parentId, homepage, file);
         setUsername('');
         setEmail('');
@@ -140,27 +154,31 @@ const CommentForm: React.FC<CommentFormProps> = ({ onCommentAdded, parentId }) =
         loadCaptcha();
         onCommentAdded();
 
+        // Сброс значения input для файла
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
+    // Показ предварительного просмотра комментария
     const showPreview = async () => {
-
-        // Вариант AJAX запроса
         try {
+            
+            // Валидация данных. Исключение означает провал валидации. 
+            // Текст ошибки используется в уведомлениях и может поступать с сервера.
             await validateComment(username, email, content, parentId, homepage);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setAlertMessage(error.message);
             } else {
-                setAlertMessage('Произошла неивестная ошибка. Попробуйте еще раз позже');
+                setAlertMessage('Произошла неизвестная ошибка. Попробуйте еще раз позже');
             }
         }
 
         setPreview(sanitizeContent());
     };
 
+    // Функция для очистки контента от небезопасных HTML-тегов
     const sanitizeContent = () => {
         return DOMPurify.sanitize(content, {
             ALLOWED_TAGS: ['a', 'code', 'i', 'strong'],
