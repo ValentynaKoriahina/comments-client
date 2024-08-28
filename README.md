@@ -89,3 +89,6 @@ npm run build
 - **POST** `/api/verifyCaptcha` - Проверка CAPTCHA.
 
 
+## Серверная часть
+
+Исходный код серверного приложения доступен в репозитории по [ссылке](https://github.com/ValentynaKoriahina/comments-server).
