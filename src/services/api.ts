@@ -165,7 +165,7 @@ export const validateComment = async (
  */
 export const getCaptcha = async (): Promise<string> => {
     try {
-        const response = await axios.get(`${api}/captcha`, {
+        const response = await axios.get(`${api}captcha`, {
             responseType: 'text',
             withCredentials: true,
         });
